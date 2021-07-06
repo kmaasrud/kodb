@@ -11,19 +11,20 @@ type Config struct {
 	Meta struct {
 		Title  string      `toml:"title"`
 		Author interface{} `toml:"author"`
-		Date   string      `toml:"date"` // String or list of strings
+		Date   string      `toml:"date"`
 	} `toml:"meta"`
 	Build struct {
 		Filename     string `toml:"filename" default:"document"`
 		Engine       string `toml:"engine" default:"pdflatex"`
 		LuaFilters   bool   `toml:"lua-filters" default:"true"`
 		OutputFormat string `toml:"output-format" default:"pdf"`
+        ChaptersDir  string `toml:"chapters-directory" default:"chapters"`
 	} `toml:"build"`
 	Style struct {
 		TwoColumn      bool     `toml:"two-column" default:"false"`
 		NumberSections bool     `toml:"number-sections" default:"false"`
 		DocumentClass  string   `toml:"document-class" default:"article"`
-		ClassOptions   []string `toml:"class-options"` // String or list of strings
+		ClassOptions   []string `toml:"class-options"`
 	} `toml:"style"`
 	Bib struct {
 		Csl                 string `toml:"csl"` // Default is Chicago MoS 17th Ed.

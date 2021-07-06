@@ -11,11 +11,11 @@ import (
 
 type Document struct {
     Root        string
-    Chapters    []Section
+    Chapters    []Chapter
     Config      *conf.Config
 }
 
-func InitDocument() (*Document, error) {
+func NewDocument() (*Document, error) {
     var doc Document
 
     // Find root
@@ -43,18 +43,18 @@ func InitDocument() (*Document, error) {
     }
 
     // Find chapters
-	var chapters []Section
-	if _, err := os.Stat(filepath.Join(root, "chapters")); os.IsNotExist(err) {
+	var chapters []Chapter
+	if _, err := os.Stat(filepath.Join(root, doc.Config.Build.ChaptersDir)); os.IsNotExist(err) {
 		return &doc, nil
 	}
 
-	// Walk should walk through dirs in lexical order, making sorting unecessary (luckily)
-	err = filepath.Walk(filepath.Join(root, "chapters"), func(path string, info os.FileInfo, err error) error {
+	// Walk should walk through dirs in lexical order, making sorting unecessary
+	err = filepath.Walk(filepath.Join(root, doc.Config.Build.ChaptersDir), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if !info.IsDir() && filepath.Ext(path) == ".md" {
-			chapter, err := SectionFromPath(path)
+			chapter, err := NewChapter(path)
 			if err != nil {
 				return err
 			}

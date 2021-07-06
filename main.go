@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-    doc, err := core.InitDocument()
+    doc, err := core.NewDocument()
     if err != nil {
         fmt.Println(err.Error())
     }
