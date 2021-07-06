@@ -20,9 +20,9 @@ func Remove(inputs []string, confirm bool) error {
 	}
 
 	// Find all existing sections
-	secs, err := utils.FindSections(rootPath)
+	secs, err := core.FindSections(rootPath)
 	if err != nil {
-		if _, ok := err.(*utils.NoSectionsError); !ok {
+		if _, ok := err.(*core.NoSectionsError); !ok {
 			return err
 		}
 		return errors.New("Could not load section list. " + err.Error())
@@ -41,11 +41,15 @@ func Remove(inputs []string, confirm bool) error {
 			removeThis = matches[0]
 		} else if len(matches) > 1 {
 			// More than 1 match, enter interactive selection mode
-			var quit bool
-			removeThis, quit = msg.ChooseSection(matches, fmt.Sprintf("Found %d matches", len(matches)), "Which one do you want to delete?")
-			if quit {
+            var titles []string
+            for _, match := range matches {
+                titles = append(titles, match.Title)
+            }
+            i, err := msg.ChooseSection(titles, fmt.Sprintf("Found %d matches", len(matches)), "Which one do you want to delete?")
+			if err != nil {
 				continue
 			}
+            removeThis = matches[i]
 		}
 
 		// Confirmation of deletion if not already supplied on the command line

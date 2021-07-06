@@ -4,32 +4,31 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/kmaasrud/doctor/core"
+    "errors"
 )
 
-// Enters interactive mode to select among a choice of sections. The boolean returned is
-// whether the user quit the interactive mode or not.
-func ChooseSection(secs []core.Section, initMessage, choiceMessage string) (core.Section, bool) {
+// Enters interactive mode to select among a choice of strings. Returns the chosen index
+// or an error indicating that the user quit.
+func ChooseSection(options []string, initMessage, choiceMessage string) (int, error) {
 	var chosenIndex string
-	var choice core.Section
+	var choice int
 
 	Info(initMessage)
 	for true {
-		for i, sec := range secs {
-			fmt.Printf("%s %s\n", Style(fmt.Sprintf("%3d", i+1), "Gray"), sec.Title)
+		for i, opt := range options {
+			fmt.Printf("%s %s\n", Style(fmt.Sprintf("%3d", i+1), "Gray"), opt)
 		}
 		fmt.Print(choiceMessage + " (q to quit) ")
 		fmt.Scanln(&chosenIndex)
 		index, err := strconv.Atoi(chosenIndex)
-		if err == nil && index > 0 && index <= len(secs) {
-			choice = secs[index-1]
+		if err == nil && index > 0 && index <= len(options) {
+			choice = index-1
 			break
 		} else if strings.ToLower(chosenIndex) == "q" {
-			return choice, true
+			return choice, errors.New("No choice done, the user quit the menu.")
 		} else {
 			Info("That is not a valid option. Please enter the number of the section you want to remove.")
 		}
 	}
-	return choice, false
+	return choice, nil
 }

@@ -10,6 +10,17 @@ import (
 	"strings"
 )
 
+// Error type returned when no sections are found from the root path.
+// Mainly used for not throwing an error in 'doctor add' when there are no sections,
+// but also useful to specify messages.
+type NoSectionsError struct {
+	errorMsg string
+}
+
+func (e *NoSectionsError) Error() string {
+	return e.errorMsg
+}
+
 // The string separating the index and the name. If changed, make a due notice to users and
 // either ensure backwards compatibility or have Doctor change the format automatically.
 const SectionSep string = "_"
@@ -102,4 +113,35 @@ func FindSectionMatches(input string, secs []Section, minus int) ([]Section, err
 		return matches, errors.New("Could not find any sections matching " + input + ".")
 	}
 	return matches, nil
+}
+
+// Returns a slice containing core.Sections corresponding to this document
+func FindSections(rootPath string) ([]Section, error) {
+	var files []Section
+
+	if _, err := os.Stat(filepath.Join(rootPath, "secs")); os.IsNotExist(err) {
+		return nil, &NoSectionsError{"Empty Doctor document."}
+	}
+
+	// Walk should walk through dirs in lexical order, making sorting unecessary (luckily)
+	err := filepath.Walk(filepath.Join(rootPath, "secs"), func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && filepath.Ext(path) == ".md" {
+			sec, err := SectionFromPath(path)
+			if err != nil {
+				return err
+			}
+			files = append(files, sec)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	} else if len(files) < 1 {
+		return nil, &NoSectionsError{"Empty Doctor document."}
+	}
+
+	return files, nil
 }

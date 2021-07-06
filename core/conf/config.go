@@ -42,7 +42,7 @@ type Config struct {
 }
 
 func ConfigFromFile(path string) (*Config, error) {
-	conf := Config{}
+	var conf Config
 	// Load the TOML bytes
 	tomlBytes, err := os.ReadFile(path)
 	if err != nil {
