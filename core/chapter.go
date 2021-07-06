@@ -10,17 +10,6 @@ import (
 	"strings"
 )
 
-// Error type returned when no sections are found from the root path.
-// Mainly used for not throwing an error in 'doctor add' when there are no sections,
-// but also useful to specify messages.
-type NoSectionsError struct {
-	errorMsg string
-}
-
-func (e *NoSectionsError) Error() string {
-	return e.errorMsg
-}
-
 // The string separating the index and the name. If changed, make a due notice to users and
 // either ensure backwards compatibility or have Doctor change the format automatically.
 const ChapterSep string = "_"
@@ -76,7 +65,7 @@ func NewChapter(path string) (Chapter, error) {
 }
 
 // Takes a list of Section structs and returns a list of the corresponding paths.
-func PathsFromSections(chapters []Chapter) []string {
+func PathsFromChapters(chapters []Chapter) []string {
 	var paths []string
 	for _, c := range chapters {
 		paths = append(paths, c.Path)
@@ -84,17 +73,17 @@ func PathsFromSections(chapters []Chapter) []string {
 	return paths
 }
 
-// Finds all sections that match the input. Returns an error if no sections match.
+// Finds all chapters that match the input. Returns an error if no chapters match.
 // 'minus' is subtracted from the index matching statement, used in the case of looping
 // over multiple inputs to match against.
-func FindSectionMatches(input string, secs []Chapter, minus int) ([]Chapter, error) {
+func FindChapterMatches(input string, chapters []Chapter, minus int) ([]Chapter, error) {
 	var matches []Chapter
 	index, err := strconv.Atoi(input)
 	if err != nil {
 		// The input is not parsable as int, handle it as a section name
-		for _, sec := range secs {
-			if strings.ToLower(sec.Title) == strings.ToLower(input) {
-				matches = append(matches, sec)
+		for _, c := range chapters {
+			if strings.ToLower(c.Title) == strings.ToLower(input) {
+				matches = append(matches, c)
 			}
 		}
 	} else {
@@ -102,9 +91,9 @@ func FindSectionMatches(input string, secs []Chapter, minus int) ([]Chapter, err
 		// Index matching is a bit difficult, since the indices change around a lot
 		// when removing multiple sections. To solve this, subtract the number of sections
 		// deleted from the index matched against.
-		for _, sec := range secs {
-			if sec.Index == index-minus {
-				matches = append(matches, sec)
+		for _, c := range chapters {
+			if c.Index == index-minus {
+				matches = append(matches, c)
 			}
 		}
 	}
@@ -113,35 +102,4 @@ func FindSectionMatches(input string, secs []Chapter, minus int) ([]Chapter, err
 		return matches, errors.New("Could not find any sections matching " + input + ".")
 	}
 	return matches, nil
-}
-
-// Returns a slice containing core.Sections corresponding to this document
-func FindSections(rootPath string) ([]Chapter, error) {
-	var files []Chapter
-
-	if _, err := os.Stat(filepath.Join(rootPath, "secs")); os.IsNotExist(err) {
-		return nil, &NoSectionsError{"Empty Doctor document."}
-	}
-
-	// Walk should walk through dirs in lexical order, making sorting unecessary (luckily)
-	err := filepath.Walk(filepath.Join(rootPath, "secs"), func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && filepath.Ext(path) == ".md" {
-			sec, err := NewChapter(path)
-			if err != nil {
-				return err
-			}
-			files = append(files, sec)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	} else if len(files) < 1 {
-		return nil, &NoSectionsError{"Empty Doctor document."}
-	}
-
-	return files, nil
 }
