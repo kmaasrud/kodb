@@ -20,7 +20,7 @@ type PandocConfig struct {
 	SupressBibliography bool        `json:"supress-bibliography"`
 }
 
-func WritePandocJson(path string, c *Config) error {
+func (c *Config) WritePandocJson(path string) error {
 	pandocConf := PandocConfig{
 		Title:               c.Meta.Title,
 		Author:              c.Meta.Author,
