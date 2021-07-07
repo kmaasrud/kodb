@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kmaasrud/doctor/cmd"
+	"github.com/kmaasrud/doctor/doctor/cmd"
 	"github.com/kmaasrud/doctor/msg"
 	"github.com/kmaasrud/doctor/utils"
 	"github.com/thatisuday/clapper"

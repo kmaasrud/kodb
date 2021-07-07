@@ -1,4 +1,4 @@
-package core
+package doctor
 
 import (
 	"errors"
@@ -10,13 +10,12 @@ import (
 	"strings"
 )
 
-// The string separating the index and the name. If changed, make a due notice to users and
-// either ensure backwards compatibility or have Doctor change the format automatically.
+// The character used as a separator in filenames.
 const ChapterSep string = "_"
 
 var headerRegex *regexp.Regexp = regexp.MustCompile(`(?m)^#\s+[^#\n]*`)
 
-// Represents a section in the document.
+// Represents a chapter in the document.
 type Chapter struct {
 	Path  string
 	Title string
@@ -24,14 +23,14 @@ type Chapter struct {
 }
 
 // Check whether this section is equal to another. Checks if their paths are equal.
-func (c Chapter) IsEqual(other Chapter) bool {
+func (c *Chapter) IsEqual(other *Chapter) bool {
 	return c.Path == other.Path
 }
 
 // Changes the index of this section by renaming the file it represents.
 func (c *Chapter) ChangeIndex(i int) error {
 	c.Index = i
-	newFilename := fmt.Sprintf("%02d_", i) + strings.Join(strings.Split(filepath.Base(c.Path), ChapterSep)[1:], "")
+	newFilename := fmt.Sprintf("%02d", i) + ChapterSep + strings.Join(strings.Split(filepath.Base(c.Path), ChapterSep)[1:], "")
 	newPath := filepath.Join(filepath.Dir(c.Path), newFilename)
 
 	err := os.Rename(c.Path, newPath)
@@ -42,11 +41,18 @@ func (c *Chapter) ChangeIndex(i int) error {
 	return nil
 }
 
-// Creates a new Section struct from the input path.
+func (c *Chapter) Content() (string, error) {
+    bytes, err := os.ReadFile(c.Path)
+    if err != nil {
+        return "", fmt.Errorf("Could not read the content of chapter %s.\n%s", c.Title, err)
+    }
+    return string(bytes), nil
+}
+
+// Creates a new Chapter struct from a file.
 func NewChapter(path string) (Chapter, error) {
-	var title string
 	split := strings.Split(strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)), ChapterSep)
-	title = strings.Join(split[1:], "")
+    title := strings.Join(split[1:], "") // FIXME: This can fail if no underscores are in the filename
 
 	content, err := os.ReadFile(path)
 	if err == nil {

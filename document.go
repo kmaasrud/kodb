@@ -1,4 +1,4 @@
-package core
+package doctor
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kmaasrud/doctor/core/conf"
-	"github.com/kmaasrud/doctor/core/bib"
+	"github.com/kmaasrud/doctor/conf"
+	"github.com/kmaasrud/doctor/bib"
 	"github.com/kmaasrud/doctor/lua"
 	"github.com/kmaasrud/doctor/msg"
 	"github.com/kmaasrud/doctor/utils"
@@ -45,7 +45,7 @@ func (d *Document) Build() error {
 
     args := []string{
         "-s",
-        "-o", filepath.Join(d.Root, d.Config.Build.Filename),
+        "-o", filepath.Join(d.Root, d.Config.Build.Filename)+".pdf",
         "--resource-path="+strings.Join([]string{d.Root, filepath.Join(d.Root, "assets"), filepath.Join(d.Root, "secs")}, utils.ResourceSep),
         "--pdf-engine="+pdfEngine,
         "--metadata-file="+filepath.Join(d.Root, "metadata.json"),

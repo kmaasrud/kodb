@@ -1,13 +1,13 @@
-package main
+package doctor
 
 import (
     "fmt"
-
-    "github.com/kmaasrud/doctor/core"
 )
 
+var logLevel int = 0
+
 func main() {
-    doc, err := core.NewDocument()
+    doc, err := NewDocument()
     if err != nil {
         fmt.Println(err.Error())
     }

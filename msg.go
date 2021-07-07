@@ -1,30 +1,70 @@
-package msg
+package doctor
 
 import (
 	"fmt"
 	"os"
 	"strings"
 	"time"
+    "io"
 )
 
+func generic(level int, symbol, text string, writer io.Writer) {
+    if level > logLevel {
+        fmt.Fprintln(writer, fmt.Sprintf(" %s  %s", symbol, text))
+    }
+}
+
 func Error(text string) {
-	fmt.Fprintln(os.Stderr, fmt.Sprintf(" %s  %s", Style("E", "Red", "Bold"), text))
+    generic(3, style("E", "Red", "Bold"), text, os.Stderr)
 }
 
 func Warning(text string) {
-	fmt.Fprintln(os.Stderr, fmt.Sprintf(" %s  %s", Style("W", "Yellow", "Bold"), text))
+    generic(2, style("W", "Yellow", "Bold"), text, os.Stderr)
 }
 
 func Info(text string) {
-	fmt.Printf("    %s\n", Style(text, "Gray"))
+    generic(1, " ", style(text, "Gray"), os.Stdout)
 }
 
 func Success(text string) {
-	fmt.Printf(" %s  %s\n", Style("✓", "Green", "Bold"), text)
+    generic(1, style("✓", "Green", "Bold"), text, os.Stdout)
 }
 
 func Debug(text string) {
-	fmt.Printf("%s %s\n", Style("DEBUG:", "Gray"), text)
+    generic(0, "D", text, os.Stdout)
+}
+
+// style takes the inputted text and styles it according to
+// the ANSI escape codes listed below. I should perhaps check for
+// non-ANSI systems, but fuck that for now...
+func style(text string, styles ...string) string {
+	code := map[string]int{
+		"Red":           31,
+		"Green":         32,
+		"Yellow":        33,
+		"Blue":          34,
+		"Magenta":       35,
+		"Cyan":          36,
+		"Gray":          90,
+		"BrightRed":     91,
+		"BrightGreen":   92,
+		"BrightYellow":  93,
+		"BrightBlue":    94,
+		"BrightMagenta": 95,
+		"BrightCyan":    96,
+		"Bold":          1,
+		"Faint":         2,
+		"Italic":        3,
+		"Underline":     4,
+		"Blink":         5,
+		"Strike":        9,
+	}
+
+	for _, style := range styles {
+		text = fmt.Sprintf("\033[%vm%v\033[0m", code[style], text)
+	}
+
+	return text
 }
 
 func Do(doingText string, done chan struct{}) {
