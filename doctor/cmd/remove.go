@@ -26,7 +26,7 @@ func Remove(inputs []string, confirm bool) error {
 
 	// Loop over supplied inputs and delete if they match
 	for i, input := range inputs {
-		matches, err := doctor.FindChapterMatches(input, doc.Chapters, i)
+		matches, err := doc.FindChapterMatches(input, i)
 		if err != nil {
 			msg.Error(err.Error())
 			continue
