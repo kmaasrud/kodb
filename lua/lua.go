@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kmaasrud/doctor/msg"
+	"github.com/kmaasrud/doctor/log"
 	"github.com/kmaasrud/doctor/utils"
 )
 
@@ -27,6 +27,8 @@ var buildFilters = map[string][]byte{
 // Function returns a list of paths too all buildFilters. If the filters are not available in the
 // Doctor data directory, then the function will ensure they are written there first.
 func BuildFilters() []string {
+    msg := log.Get()
+
 	var paths []string
 
 	dataDir, err := utils.FindDoctorDataDir()
@@ -62,6 +64,8 @@ func BuildFilters() []string {
 }
 
 func WordCountFilter() (string, error) {
+    msg := log.Get()
+
 	dataDir, err := utils.FindDoctorDataDir()
 	if err != nil {
 		return "", errors.New("Could not determine the Doctor data directory.")

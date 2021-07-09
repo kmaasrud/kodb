@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/kmaasrud/doctor/conf"
+	"github.com/kmaasrud/doctor/log"
 	"github.com/kmaasrud/doctor/bib"
 	"github.com/kmaasrud/doctor/lua"
-	"github.com/kmaasrud/doctor/msg"
 	"github.com/kmaasrud/doctor/utils"
 )
 
@@ -21,6 +21,8 @@ type Document struct {
 }
 
 func (d *Document) Build() error {
+    msg := log.Get()
+
 	pandocPath, err := utils.CheckPath("pandoc")
 	if err != nil {
 		return errors.New("Build failed. " + err.Error())
@@ -88,6 +90,8 @@ func (d *Document) Build() error {
 }
 
 func NewDocument() (*Document, error) {
+    msg := log.Get()
+
     var doc Document
 
     // Find root

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/kmaasrud/doctor/doctor/cmd"
-	"github.com/kmaasrud/doctor/msg"
+	"github.com/kmaasrud/doctor/log"
 	"github.com/kmaasrud/doctor/utils"
 	"github.com/thatisuday/clapper"
 )
@@ -13,6 +13,9 @@ import (
 var VERSION = "DEV"
 
 func main() {
+    log.Level = 1 // Set logger to Info level initially
+    msg := log.Get()
+
 	// Set up registry with commands
 	registry := clapper.NewRegistry()
 

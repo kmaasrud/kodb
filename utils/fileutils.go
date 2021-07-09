@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/kmaasrud/doctor/msg"
+	"github.com/kmaasrud/doctor/log"
 )
 
 
@@ -14,6 +14,8 @@ import (
 // of the directory containing it. If it reaches the root directory without finding
 // anything, the function returns an error.
 func FindDoctorRoot() (string, error) {
+    msg := log.Get()
+
 	path, err := os.Getwd()
 	if err != nil {
 		msg.Error(err.Error())

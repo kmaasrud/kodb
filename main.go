@@ -1,15 +1,11 @@
 package doctor
 
-import (
-    "fmt"
-)
-
-var logLevel int = 0
+var logLevel int = 2
 
 func main() {
-    doc, err := NewDocument()
+    /* doc, err := NewDocument()
     if err != nil {
         fmt.Println(err.Error())
     }
-    fmt.Printf("%s\n", doc)
+    fmt.Printf("%s\n", doc) */
 }
