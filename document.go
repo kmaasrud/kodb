@@ -77,10 +77,14 @@ func (d *Document) Build() error {
 		msg.Warning("Could not find bibliography file: '" + d.Config.Bib.BibliographyFile + "'. Skipping citation processing.")
 	}
 
-    // Add all chapters
-    args = append(args, PathsFromChapters(d.Chapters)...)
+    // Read all content
+    content, err := d.Content()
+    if err != nil {
+        return errors.New("Could not read content of document. " + err.Error())
+    }
 
     cmd := exec.Command(pandocPath, args...)
+    cmd.Stdin = strings.NewReader(content)
     err = cmd.Run()
     if err != nil {
         return err
@@ -89,20 +93,30 @@ func (d *Document) Build() error {
     return nil
 }
 
+func (d *Document) Content() (string, error) {
+    var content string
+
+    for _, c := range d.Chapters {
+        chapterContent, err := c.Content()
+        if err != nil {
+            return content, err
+        }
+        content += chapterContent + "\n"
+    }
+
+    return content, nil
+}
+
 func NewDocument() (*Document, error) {
-    msg := log.Get()
-
-    var doc Document
-
     // Find root
 	root, err := os.Getwd()
 	if err != nil {
-		msg.Error(err.Error())
+		return nil, err
 	}
 
 	for {
 		if filepath.Dir(root) == root {
-			return &doc, errors.New("Could not find a Doctor document.")
+			return nil, errors.New("Could not find a Doctor document.")
 		} else if _, err := os.Stat(filepath.Join(root, "doctor.toml")); os.IsNotExist(err) {
 			root = filepath.Dir(root)
         } else {
@@ -110,22 +124,20 @@ func NewDocument() (*Document, error) {
         }
 	}
 
-    doc.Root = root
-
     // Find config
-    doc.Config, err = conf.ConfigFromFile(filepath.Join(root, "doctor.toml"))
+    config, err := conf.ConfigFromFile(filepath.Join(root, "doctor.toml"))
     if err != nil {
-        return &doc, err
+        return nil, err
     }
 
     // Find chapters
 	var chapters []Chapter
-	if _, err := os.Stat(filepath.Join(root, doc.Config.Build.ChaptersDir)); os.IsNotExist(err) {
-		return &doc, nil
+	if _, err := os.Stat(filepath.Join(root, config.Build.ChaptersDir)); os.IsNotExist(err) {
+		return nil, nil
 	}
 
 	// Walk should walk through dirs in lexical order, making sorting unecessary
-	err = filepath.Walk(filepath.Join(root, doc.Config.Build.ChaptersDir), func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(filepath.Join(root, config.Build.ChaptersDir), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -139,12 +151,12 @@ func NewDocument() (*Document, error) {
 		return nil
 	})
 	if err != nil {
-		return &doc, err
-	} else if len(chapters) < 1 {
-		return &doc, nil
+		return nil, err
 	}
 
-    doc.Chapters = chapters
-
-    return &doc, nil
+    return &Document{
+        Root: root,
+        Config: config,
+        Chapters: chapters,
+    }, nil
 }
