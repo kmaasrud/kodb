@@ -1,5 +1,17 @@
 # Changelogs
 
+## Doctor v0.3.0 (Unreleased)
+
+### Breaking changes
+
+- [ ] The Doctor API is totally revamped and should now be easily usable by other projects. The CLI tool is now built upon this API.
+- [x] **Sections** are now called **chapters**. This terminology scales better with larger projects, while still being applicable for smaller ones. The source directory default is now `chapters`, so you'll need to rename your `secs` directory. An alternative is to use the new option to configure the source directory, namely add `source-directory = "secs"` into your `doctor.toml` file.
+
+### New features
+
+- [x] New configuration option: You can now choose the source directory (the directory storing your Markdown files), by using the `source-directory` option under the `[build]` header in `doctor.toml`. By setting `source-directory = "."`, you can thus have all your chapters stored in the document root, if that is desireable. The default value is `"chapters"`.
+
+
 ## Doctor v0.2.7 (2020-07-06)
 
 ### New features
