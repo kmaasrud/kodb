@@ -1,29 +1,24 @@
 package cmd
 
 import (
-	"errors"
+    "errors"
 
-	"github.com/kmaasrud/doctor/core"
+	"github.com/kmaasrud/doctor"
 	"github.com/kmaasrud/doctor/utils"
 )
 
 func Edit(query string) error {
-	rootPath, err := utils.FindDoctorRoot()
+	doc, err := doctor.NewDocument()
 	if err != nil {
 		return err
 	}
 
-	// Find all existing sections
-	secs, err := utils.FindSections(rootPath)
-	if err != nil {
-		if _, ok := err.(*utils.NoSectionsError); !ok {
-			return err
-		}
-		return errors.New("Could not load section list. " + err.Error())
-	}
+    if len(doc.Chapters) > 1 {
+        return errors.New("There are no chapters in this document.")
+    }
 
 	// Find the section we want to move
-	matches, err := core.FindSectionMatches(query, secs, 0)
+	matches, err := doc.FindChapterMatches(query, 0)
 	if err != nil {
 		return err
 	}
