@@ -29,19 +29,19 @@ func (l *logger) generic(level int, symbol, text string, writer io.Writer) {
 }
 
 func (l *logger) Error(text string) {
-    l.generic(3, style("E", "Red", "Bold"), text, os.Stderr)
+    l.generic(3, Style("E", "Red", "Bold"), text, os.Stderr)
 }
 
 func (l *logger) Warning(text string) {
-    l.generic(2, style("W", "Yellow", "Bold"), text, os.Stderr)
+    l.generic(2, Style("W", "Yellow", "Bold"), text, os.Stderr)
 }
 
 func (l *logger) Info(text string) {
-    l.generic(1, " ", style(text, "Gray"), os.Stdout)
+    l.generic(1, " ", Style(text, "Gray"), os.Stdout)
 }
 
 func (l *logger) Success(text string) {
-    l.generic(1, style("✓", "Green", "Bold"), text, os.Stdout)
+    l.generic(1, Style("✓", "Green", "Bold"), text, os.Stdout)
 }
 
 func (l *logger) Debug(text string) {
@@ -65,10 +65,10 @@ func createLogger() *logger {
     }
 }
 
-// style takes the inputted text and styles it according to
+// Style takes the inputted text and styles it according to
 // the ANSI escape codes listed below. I should perhaps check for
 // non-ANSI systems, but fuck that for now...
-func style(text string, styles ...string) string {
+func Style(text string, styles ...string) string {
 	code := map[string]int{
 		"Red":           31,
 		"Green":         32,
@@ -108,7 +108,7 @@ func ChooseSection(options []string, initMessage, choiceMessage string) (int, er
 	log.Info(initMessage)
 	for true {
 		for i, opt := range options {
-			fmt.Printf("%s %s\n", style(fmt.Sprintf("%3d", i+1), "Gray"), opt)
+			fmt.Printf("%s %s\n", Style(fmt.Sprintf("%3d", i+1), "Gray"), opt)
 		}
 		fmt.Print(choiceMessage + " (q to quit) ")
 		fmt.Scanln(&chosenIndex)
@@ -134,7 +134,7 @@ func Do(doingText string, done chan struct{}) {
 		case <-ticker.C:
 			i = i % 3
 			dots := strings.Repeat(".", i+1) + strings.Repeat(" ", 2-i)
-			fmt.Printf("\033[2K\r%s %s", style(dots, "Gray"), doingText)
+			fmt.Printf("\033[2K\r%s %s", Style(dots, "Gray"), doingText)
 			i += 1
 		case <-done:
 			return
@@ -158,11 +158,11 @@ func CleanStderrMsg(stderr string) (string, string) {
 		}
 
 		if strings.HasPrefix(line, "! ") {
-			errors += "        " + style("TeX: ", "Bold") + strings.TrimPrefix(line, "! ") + "\n"
+			errors += "        " + Style("TeX: ", "Bold") + strings.TrimPrefix(line, "! ") + "\n"
 		} else if strings.HasPrefix(line, "[WARNING] ") {
-			warnings += "        " + style("Pandoc: ", "Bold") + strings.TrimPrefix(line, "[WARNING] ") + "\n"
+			warnings += "        " + Style("Pandoc: ", "Bold") + strings.TrimPrefix(line, "[WARNING] ") + "\n"
 		} else if strings.HasPrefix(line, "[ERROR] ") {
-			errors += "        " + style("Pandoc: ", "Bold") + strings.TrimPrefix(line, "[ERROR] ") + "\n"
+			errors += "        " + Style("Pandoc: ", "Bold") + strings.TrimPrefix(line, "[ERROR] ") + "\n"
 		} else {
 			errors += "        " + line + "\n"
 		}
