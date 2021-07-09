@@ -6,31 +6,27 @@ import (
 	"os"
 	"strings"
 
+	"github.com/kmaasrud/doctor"
 	"github.com/kmaasrud/doctor/core"
-	"github.com/kmaasrud/doctor/msg"
-	"github.com/kmaasrud/doctor/utils"
+	"github.com/kmaasrud/doctor/log"
 )
 
 func Remove(inputs []string, confirm bool) error {
+    msg := log.Get()
 	var removeThis core.Section
 
-	rootPath, err := utils.FindDoctorRoot()
+	doc, err := doctor.NewDocument()
 	if err != nil {
 		return err
 	}
 
-	// Find all existing sections
-	secs, err := core.FindSections(rootPath)
-	if err != nil {
-		if _, ok := err.(*core.NoSectionsError); !ok {
-			return err
-		}
-		return errors.New("Could not load section list. " + err.Error())
-	}
+    if len(doc.Chapters) < 1 {
+        return errors.New("Cannot remove. This document does not contain any chapters.")
+    }
 
 	// Loop over supplied inputs and delete if they match
 	for i, input := range inputs {
-		matches, err := core.FindSectionMatches(input, secs, i)
+		matches, err := doctor.FindChapterMatches(input, doc.Chapters, i)
 		if err != nil {
 			msg.Error(err.Error())
 			continue
@@ -45,7 +41,7 @@ func Remove(inputs []string, confirm bool) error {
             for _, match := range matches {
                 titles = append(titles, match.Title)
             }
-            i, err := msg.ChooseSection(titles, fmt.Sprintf("Found %d matches", len(matches)), "Which one do you want to delete?")
+            i, err := log.ChooseSection(titles, fmt.Sprintf("Found %d matches", len(matches)), "Which one do you want to delete?")
 			if err != nil {
 				continue
 			}
@@ -55,10 +51,10 @@ func Remove(inputs []string, confirm bool) error {
 		// Confirmation of deletion if not already supplied on the command line
 		if !confirm {
 			var confirmString string
-			fmt.Printf("Are you sure you want to delete %s? (y/N) ", msg.Style(removeThis.Title, "Bold"))
+			fmt.Printf("Are you sure you want to delete \"%s\"? (y/N) ", removeThis.Title)
 			fmt.Scanln(&confirmString)
 			if strings.ToLower(confirmString) != "y" {
-				msg.Info("Skipping deletion of " + removeThis.Title + ".")
+				msg.Info("Skipping deletion of \"" + removeThis.Title + "\".")
 				continue
 			}
 		}
@@ -66,30 +62,30 @@ func Remove(inputs []string, confirm bool) error {
 		// Remove the file
 		err = os.Remove(removeThis.Path)
 		if err != nil {
-			msg.Error("Could not remove section " + msg.Style(removeThis.Title, "Bold") + ". " + err.Error())
+			msg.Error("Could not remove section \"" + removeThis.Title + "\". " + err.Error())
 			continue
 		}
-		msg.Success("Deleted section " + msg.Style(removeThis.Title, "Bold") + ".")
+		msg.Success("Deleted section \"" + removeThis.Title + "\".")
 
 		// Decrement the sections above the removed one
 		msg.Info("Reordering existing sections...")
-		for j := removeThis.Index + 1; j < len(secs); j++ {
+		for j := removeThis.Index + 1; j < len(doc.Chapters); j++ {
 			// Make sure we're not trying to renumber removeThis itself (if multiple sections previously shared indices)
-			if secs[j].IsEqual(removeThis) {
+			if doc.Chapters[j].IsEqual(removeThis) {
 				continue
 			}
-			err = secs[j].ChangeIndex(j - 1)
+			err = doc.Chapters[j].ChangeIndex(j - 1)
 			if err != nil {
 				return errors.New("Could not bump index of existing section.\n        " + err.Error())
 			}
 		}
 
-		if removeThis.Index > len(secs)-2 {
+		if removeThis.Index > len(doc.Chapters)-2 {
 			// If the removed section has the highest index, just slice away the last element of secs
-			secs = secs[:len(secs)-2]
+			doc.Chapters = doc.Chapters[:len(doc.Chapters)-2]
 		} else {
 			// Else, remove the element pertaining to this index and keep the order by reslicing
-			secs = append(secs[:removeThis.Index], secs[removeThis.Index+1:]...)
+			doc.Chapters = append(doc.Chapters[:removeThis.Index], doc.Chapters[removeThis.Index+1:]...)
 		}
 	}
 
