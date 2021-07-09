@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kmaasrud/doctor/cmd/update"
-	"github.com/kmaasrud/doctor/msg"
+	"github.com/kmaasrud/doctor/doctor/cmd/update"
+	"github.com/kmaasrud/doctor/log"
 	"github.com/thatisuday/clapper"
 )
 
@@ -24,7 +24,7 @@ func DoCommand(command *clapper.CommandConfig, version string) error {
 			if ok, _ := strconv.ParseBool(val.Value); ok {
 				switch flag {
 				case "version":
-					fmt.Printf("You are running Doctor %s\n", msg.Style(version, "Bold"))
+					fmt.Printf("You are running Doctor %s\n", log.Style(version, "Bold"))
 
 				case "update":
 					err := update.Update(version)

@@ -5,11 +5,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
+	"github.com/kmaasrud/doctor/bib"
 	"github.com/kmaasrud/doctor/conf"
 	"github.com/kmaasrud/doctor/log"
-	"github.com/kmaasrud/doctor/bib"
 	"github.com/kmaasrud/doctor/lua"
 	"github.com/kmaasrud/doctor/utils"
 )
@@ -106,6 +107,38 @@ func (d *Document) Content() (string, error) {
 
     return content, nil
 }
+
+// Finds all chapters that match the input. Returns an error if no chapters match.
+// 'minus' is subtracted from the index matching statement, used in the case of looping
+// over multiple inputs to match against.
+func (d *Document) FindChapterMatches(input string, minus int) ([]Chapter, error) {
+	var matches []Chapter
+	index, err := strconv.Atoi(input)
+	if err != nil {
+		// The input is not parsable as int, handle it as a section name
+		for _, c := range d.Chapters {
+			if strings.ToLower(c.Title) == strings.ToLower(input) {
+				matches = append(matches, c)
+			}
+		}
+	} else {
+		// The input is parsable as int, handle it as a section index
+		// Index matching is a bit difficult, since the indices change around a lot
+		// when removing multiple sections. To solve this, subtract the number of sections
+		// deleted from the index matched against.
+		for _, c := range d.Chapters {
+			if c.Index == index-minus {
+				matches = append(matches, c)
+			}
+		}
+	}
+
+	if len(matches) < 1 {
+		return matches, errors.New("Could not find any sections matching " + input + ".")
+	}
+	return matches, nil
+}
+
 
 func NewDocument() (*Document, error) {
     // Find root

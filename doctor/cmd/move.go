@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kmaasrud/doctor/core"
-	"github.com/kmaasrud/doctor/msg"
+	"github.com/kmaasrud/doctor/log"
 	"github.com/kmaasrud/doctor/utils"
 )
 
@@ -33,9 +33,8 @@ func Move(input string, to int) error {
 
 	// If multiple matches, enter interactive selection mode
 	if len(matches) > 1 {
-		var quit bool
-		moveThis, quit = msg.ChooseSection(matches, fmt.Sprintf("Found %d matches", len(matches)), "Which one do you want to move?")
-		if quit {
+		moveThis, err = log.ChooseSection(matches, fmt.Sprintf("Found %d matches", len(matches)), "Which one do you want to move?")
+		if err != nil {
 			return nil
 		}
 	} else {
