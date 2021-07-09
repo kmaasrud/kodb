@@ -18,7 +18,7 @@ type Config struct {
 		Engine       string `toml:"engine" default:"pdflatex"`
 		LuaFilters   bool   `toml:"lua-filters" default:"true"`
 		OutputFormat string `toml:"output-format" default:"pdf"`
-        ChaptersDir  string `toml:"chapters-directory" default:"chapters"`
+        SourceDir    string `toml:"source-directory" default:"chapters"`
 	} `toml:"build"`
 	Style struct {
 		TwoColumn      bool     `toml:"two-column" default:"false"`

@@ -1,6 +1,17 @@
 package main
 
 import (
+    "fmt"
+    "github.com/kmaasrud/doctor"
+)
+func main() {
+    doc, _ := doctor.NewDocument()
+
+    content, _ := doc.Content()
+    fmt.Println(content)
+}
+
+/* import (
 	"fmt"
 	"os"
 
@@ -83,4 +94,4 @@ func main() {
 		}
 		os.Exit(1)
 	}
-}
+} */

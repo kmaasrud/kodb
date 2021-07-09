@@ -132,12 +132,12 @@ func NewDocument() (*Document, error) {
 
     // Find chapters
 	var chapters []Chapter
-	if _, err := os.Stat(filepath.Join(root, config.Build.ChaptersDir)); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(root, config.Build.SourceDir)); os.IsNotExist(err) {
 		return nil, nil
 	}
 
 	// Walk should walk through dirs in lexical order, making sorting unecessary
-	err = filepath.Walk(filepath.Join(root, config.Build.ChaptersDir), func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(filepath.Join(root, config.Build.SourceDir), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
