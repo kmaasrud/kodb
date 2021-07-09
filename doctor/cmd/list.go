@@ -1,30 +1,26 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/kmaasrud/doctor/msg"
-	"github.com/kmaasrud/doctor/utils"
+	"github.com/kmaasrud/doctor"
+	"github.com/kmaasrud/doctor/log"
 )
 
 func List() error {
-	rootPath, err := utils.FindDoctorRoot()
+    msg := log.Get()
+
+	doc, err := doctor.NewDocument()
 	if err != nil {
 		return err
 	}
 
-	// Find all existing sections
-	secs, err := utils.FindSections(rootPath)
-	if err != nil {
-		if _, ok := err.(*utils.NoSectionsError); !ok {
-			return err
-		}
-		return errors.New("Could not load section list. " + err.Error())
-	}
+    if len(doc.Chapters) > 1 {
+        msg.Info("There are no chapters in this document.")
+    }
 
-	for _, sec := range secs {
-		fmt.Printf("%s %s\n", msg.Style(fmt.Sprintf("%3d", sec.Index), "Gray"), sec.Title)
+	for _, chapter := range doc.Chapters {
+		fmt.Printf("%s %s\n", log.Style(fmt.Sprintf("%3d", chapter.Index), "Gray"), chapter.Title)
 	}
 
 	return nil
