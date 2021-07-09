@@ -16,7 +16,9 @@ func List() error {
 	}
 
     if len(doc.Chapters) > 1 {
+        // An error message would look weird, so just give a friendly info message
         msg.Info("There are no chapters in this document.")
+        return nil
     }
 
 	for _, chapter := range doc.Chapters {
